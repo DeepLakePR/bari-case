@@ -1,6 +1,8 @@
+"use client";
+
 import { useState } from 'react';
 import { CheckOutlined, ClockCircleOutlined } from "@ant-design/icons";
-import { Table, Tag, Space, Button } from "antd";
+import { Table, Tag, Space, Button, Empty } from "antd";
 
 const { Column } = Table;
 
@@ -49,7 +51,13 @@ export default function TaskTable() {
         onChange: onSelectChange,
     };
 
-    return <Table<TableDataType> dataSource={data} rowSelection={rowSelection}>
+    return <Table<TableDataType>
+        dataSource={data} rowSelection={rowSelection}
+        locale={{ emptyText: <div className="p-12">
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={"Nenhuma tarefa encontrada."} />
+        </div> }}
+    >
+
         <Column title="Título" dataIndex="title" key="title" />
         <Column
             title="Prioridade"

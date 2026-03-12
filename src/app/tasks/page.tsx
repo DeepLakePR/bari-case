@@ -1,5 +1,7 @@
+import AppLayout from "@/components/AppLayout";
+
 export default function Tasks() {
 
 
-    return <p>a</p>
+    return <AppLayout></AppLayout>
 }

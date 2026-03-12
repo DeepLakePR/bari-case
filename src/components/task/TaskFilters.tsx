@@ -1,3 +1,5 @@
+"use client";
+
 import { Flex, Space, Input, Select } from "antd";
 const { Search } = Input;
 import type { GetProps } from 'antd';
@@ -13,19 +15,17 @@ export default function TaskFilters() {
     };
 
     return <Space>
-        <Flex>
-            <Search placeholder="Buscar" allowClear onSearch={onSearch} />
+        <Search placeholder="Buscar" allowClear onSearch={onSearch} />
 
-            <Select
-                defaultValue="all"
-                style={{ width: 120 }}
-                onChange={handleChange}
-                options={[
-                    { value: 'all', label: 'Todas' },
-                    { value: 'pending', label: 'Pendentes' },
-                    { value: 'concluded', label: 'Concluídas' },
-                ]}
-            />
-        </Flex>
+        <Select
+            defaultValue="all"
+            className="w-40"
+            onChange={handleChange}
+            options={[
+                { value: 'all', label: 'Todas' },
+                { value: 'pending', label: 'Pendentes' },
+                { value: 'concluded', label: 'Concluídas' },
+            ]}
+        />
     </Space>
 }

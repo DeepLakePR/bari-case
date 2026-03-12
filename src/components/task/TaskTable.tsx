@@ -1,6 +1,12 @@
+import { useState } from 'react';
 import { CheckOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import { Table, Tag, Space, Button } from "antd";
+
 const { Column } = Table;
+
+import type { TableProps } from 'antd';
+
+type TableRowSelection<T extends object = object> = TableProps<T>['rowSelection'];
 
 interface TableDataType {
     key: React.Key;
@@ -30,8 +36,20 @@ const priorityConverter = {
 export default function TaskTable() {
 
     const data: TableDataType[] = [];
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-    return <Table<TableDataType> dataSource={data}>
+    const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+        console.log('selectedRowKeys changed: ', newSelectedRowKeys);
+        setSelectedRowKeys(newSelectedRowKeys);
+    };
+
+
+    const rowSelection: TableRowSelection<TableDataType> = {
+        selectedRowKeys,
+        onChange: onSelectChange,
+    };
+
+    return <Table<TableDataType> dataSource={data} rowSelection={rowSelection}>
         <Column title="Título" dataIndex="title" key="title" />
         <Column
             title="Prioridade"
@@ -49,10 +67,11 @@ export default function TaskTable() {
             dataIndex="status"
             key="status"
             render={(status: boolean) => (
-                status 
-                ? <p><CheckOutlined /> Concluída</p> 
-                : <p><ClockCircleOutlined /> Pendente</p>
+                status
+                    ? <p><CheckOutlined /> Concluída</p>
+                    : <p><ClockCircleOutlined /> Pendente</p>
             )}
+        // Or use badge
         />
         <Column
             title="Ações"

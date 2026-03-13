@@ -27,6 +27,19 @@ export default function TaskFilters() {
                 onChange={handleChange}
                 options={[...FILTER_OPTIONS]}
             />
+
+            <Select
+                mode="multiple"
+                allowClear
+                className="w-70"
+                placeholder="Prioridade"
+                onChange={handleChange}
+                options={[
+                    { label: "Baixa", value: "low" },
+                    { label: "Média", value: "medium" },
+                    { label: "Alta", value: "high" },
+                ]}
+            />
         </Space>
     );
 }

@@ -1,7 +1,7 @@
 # Como Rodar o Projeto
 
 1. Clone/Fork o repositório.
-2. Com o repositório na sua máquina, abra ele no seu editor de preferência e rode `yarn install`, o `package.json` usa o yarn como *packageManager*, porém se preferir pode usar outro gerenciador de sua preferência.
+2. Com o repositório na sua máquina, abra ele no seu editor de preferência e rode `yarn install`, o `package.json` usa o yarn como **packageManager**, porém se preferir pode usar outro gerenciador de sua preferência.
 3. Rode localmente com `yarn dev` ou package manager de sua preferência.
 
 ## Decisões Técnicas
@@ -16,4 +16,4 @@
 ## Estrutura localStorage
 
 No primeiro carregamento, o localStorage vem vazio, então é usado o mock data do `tasks.json`, porém ao fazer qualquer ação, os dados são salvos no localStorage e o mock data não é mais carregado.
-As tasks tem uma chave *tasks* no storage onde a estrutura é um *Array* de *Tasks*, contendo o *id, title, description, dueDate, priority & done*.
+As tasks tem uma chave **tasks** no storage onde a estrutura é um **Array** de **Tasks**, contendo o **id, title, description, dueDate, priority & done**.

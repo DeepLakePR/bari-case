@@ -17,6 +17,7 @@ export type TaskInput = {
 export type UseTasksResult = {
     tasks: Task[];
     setTasks: (tasks: Task[]) => void;
+    isLoading: boolean;
     createTask: (data: TaskInput) => Promise<boolean>;
     updateTask: (data: TaskInput) => Promise<boolean>;
     updateManyTask: (id: string[]) => Promise<boolean>;
@@ -25,27 +26,31 @@ export type UseTasksResult = {
 
 export function useTasks(): UseTasksResult {
 
-    const [tasks, setTasks] = useState<Task[]>(() => {
-
-        if (typeof window === "undefined") return [];
-        
-        const storagedTasks = window.localStorage.getItem("tasks");
-        
-        if (storagedTasks && storagedTasks !== "[]") {
-            return JSON.parse(storagedTasks) as Task[];
-        }
-
-        return mock as Task[];
-    });
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
 
         if (typeof window === "undefined") return;
 
+        const storagedTasks = window.localStorage.getItem("tasks");
+
+        if (storagedTasks && storagedTasks !== "[]") {
+            setTasks(JSON.parse(storagedTasks) as Task[]);
+        } else {
+            setTasks(mock as Task[]);
+        }
+
+        setIsLoading(false);
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        if (isLoading) return;
+
         const stringifyTasks = JSON.stringify(tasks);
         window.localStorage.setItem("tasks", stringifyTasks);
-
-    }, [tasks]);
+    }, [isLoading, tasks]);
 
     async function createTask(data: TaskInput) {
 
@@ -113,5 +118,5 @@ export function useTasks(): UseTasksResult {
         return true;
     }
 
-    return { tasks, setTasks, createTask, updateTask, updateManyTask, deleteTask };
+    return { tasks, setTasks, isLoading, createTask, updateTask, updateManyTask, deleteTask };
 }

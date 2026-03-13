@@ -1,7 +1,7 @@
 "use client";
 
 import { DatePicker, Flex, Form, Input, Modal, Select } from "antd";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { Dayjs } from "dayjs";
 import type { TaskInput } from "@/hooks/useTasks";
@@ -32,6 +32,7 @@ export default function TaskModalForm({
 }: TaskModalFormProps) {
     const [form] = Form.useForm<FieldType>();
     const isEditing = Boolean(task);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const initialValues = useMemo<Partial<FieldType>>(
         () => ({
@@ -69,13 +70,16 @@ export default function TaskModalForm({
             onCancel={handleCancel}
             okText={!isEditing ? "Criar" : "Salvar"}
             cancelText="Cancelar"
+            confirmLoading={isSubmitting}
+            forceRender
         >
             <Form<FieldType>
                 form={form}
                 name="task"
                 initialValues={initialValues}
                 layout="vertical"
-                onFinish={(data) => {
+                onFinish={async (data) => {
+                    setIsSubmitting(true);
                     const payload: TaskInput = {
                         id: task?.id,
                         title: data.title,
@@ -84,12 +88,16 @@ export default function TaskModalForm({
                         dueDate: data.dueDate ? data.dueDate.format("YYYY-MM-DD") : "",
                     };
 
-                    if (isEditing) {
-                        onUpdate(payload);
-                    } else {
-                        onCreate(payload);
+                    try {
+                        if (isEditing) {
+                            await onUpdate(payload);
+                        } else {
+                            await onCreate(payload);
+                        }
+                        onOpenChange(false);
+                    } finally {
+                        setIsSubmitting(false);
                     }
-                    onOpenChange(false);
                 }}
                 autoComplete="on"
             >

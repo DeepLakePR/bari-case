@@ -9,13 +9,18 @@ import useModalForm from "@/hooks/useModalForm";
 import { useTasks } from "@/hooks/useTasks";
 import type { Task } from "@/types/task";
 import { useState } from "react";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export default function AppLayout() {
 
     const { open, setOpen } = useModalForm();
-    const { tasks, createTask, deleteTask, updateManyTask, updateTask } = useTasks();
+    const { tasks, createTask, deleteTask, updateManyTask, updateTask, isLoading } = useTasks();
     const [editingTask, setEditingTask] = useState<Task | null>(null);
     
+    if (isLoading) {
+        return <LoadingScreen label="Carregando tarefas" />;
+    }
+
     return (
         <main className="mx-auto flex max-w-[100rem] flex-col p-8 bg-white rounded-lg">
             <TaskModalForm
@@ -55,6 +60,7 @@ export default function AppLayout() {
                     tasks={tasks}
                     onDeleteTask={deleteTask}
                     onUpdateMany={updateManyTask}
+                    loading={isLoading}
                     onEditTask={(task) => {
                         setEditingTask(task);
                         setOpen(true);

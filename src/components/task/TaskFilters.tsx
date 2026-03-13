@@ -25,7 +25,7 @@ export default function TaskFilters() {
                 defaultValue="all"
                 className="w-40"
                 onChange={handleChange}
-                options={FILTER_OPTIONS}
+                options={[...FILTER_OPTIONS]}
             />
         </Space>
     );

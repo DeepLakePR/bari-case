@@ -1,22 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { CheckOutlined, ClockCircleOutlined, DeleteFilled, EditFilled } from "@ant-design/icons";
-import { Button, Empty, Space, Table, Tag } from "antd";
+import { CheckOutlined, ClockCircleOutlined, DeleteFilled, EditFilled, QuestionCircleOutlined } from "@ant-design/icons";
+import { Button, Empty, message, Popconfirm, Space, Table, Tag } from "antd";
 import type { TableColumnsType, TableProps } from "antd";
 import { PRIORITY_META } from "@/lib/task";
 import type { Task } from "@/types/task";
-import { useTasks } from "@/hooks/useTasks";
 
 type TableRowSelection<T extends object = object> = TableProps<T>["rowSelection"];
 
-export default function TaskTable() {
-    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-    const { tasks } = useTasks();
+type TaskTableProps = {
+    tasks: Task[];
+    onDeleteTask: (id: string) => Promise<boolean>;
+    onUpdateMany: (id: string[]) => Promise<boolean>;
+};
+
+export default function TaskTable({ tasks, onDeleteTask, onUpdateMany }: TaskTableProps) {
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>(
+        tasks.filter((t) => t.done === true).map((t) => t.id)
+    );
+    const [messageApi, context] = message.useMessage();
 
     const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-        console.log("selectedRowKeys changed: ", newSelectedRowKeys);
         setSelectedRowKeys(newSelectedRowKeys);
+        onUpdateMany(newSelectedRowKeys as string[]);
     };
 
     const rowSelection: TableRowSelection<Task> = {
@@ -38,13 +45,13 @@ export default function TaskTable() {
         },
         { title: "Título", dataIndex: "title", key: "title" },
         {
-            title: "Data de entrega", 
-            dataIndex: "dueDate", 
-            key: "dueDate", 
-            render: (value: string) => 
-                value 
-                ? new Date(value).toLocaleDateString("pt-BR") 
-                : <p className="text-black/40">Sem data de entrega</p>
+            title: "Data de entrega",
+            dataIndex: "dueDate",
+            key: "dueDate",
+            render: (value: string) =>
+                value
+                    ? new Date(value).toLocaleDateString("pt-BR")
+                    : <p className="text-black/40">Sem data de entrega</p>
         },
         {
             title: "Status",
@@ -67,13 +74,27 @@ export default function TaskTable() {
             render: (_: unknown, record) => (
                 <Space size="small">
                     <Button icon={<EditFilled />} type="primary" />
-                    <Button icon={<DeleteFilled />} danger />
+                    <Popconfirm
+                        title="Deletar Tarefa"
+                        description="Você tem certeza que deseja deletar essa tarefa?"
+                        icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                        okText="Sim"
+                        onConfirm={async () => {
+                            const success = await onDeleteTask(record.id);
+                            if (success) messageApi.success("Tarefa deletada com sucesso.")
+                            else messageApi.error("Erro ao deletar tarefa.");
+                        }}
+                    >
+                        <Button icon={<DeleteFilled />} danger />
+
+                    </Popconfirm>
                 </Space>
             ),
         },
     ];
 
-    return (
+    return (<>
+        {context}
         <Table<Task>
             rowKey="id"
             dataSource={tasks}
@@ -90,5 +111,7 @@ export default function TaskTable() {
                 ),
             }}
         />
+    </>
     );
+
 }

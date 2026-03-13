@@ -1,64 +1,62 @@
 "use client";
 
-import type { Task } from "@/types/task";
+import type { Task, TaskPriority } from "@/types/task";
 import mock from '@/data/tasks.json';
 import { useEffect, useState } from "react";
 import { PRIORITY_META } from "@/lib/task";
-import { randomUUID } from "crypto";
+
+export type TaskInput = {
+    id?: string;
+    title: string;
+    description?: string;
+    priority: TaskPriority;
+    dueDate?: string;
+    done?: boolean;
+}
 
 export type UseTasksResult = {
     tasks: Task[];
-    createTask: (data: Task) => Promise<boolean>;
-    updateTask: (id: string) => Promise<boolean>;
+    setTasks: (tasks: Task[]) => void;
+    createTask: (data: TaskInput) => Promise<boolean>;
+    updateTask: (data: TaskInput) => Promise<boolean>;
+    updateManyTask: (id: string[]) => Promise<boolean>;
     deleteTask: (id: string) => Promise<boolean>;
 };
 
 export function useTasks(): UseTasksResult {
 
-    const [tasks, setTasks] = useState<Task[]>([]);
+    const [tasks, setTasks] = useState<Task[]>(() => {
 
-    useEffect(() => {
-
-        async function retrieveTasks() {
-            if (typeof window === undefined || typeof window === null) return;
-
-            const storagedTasks: string | null = window.localStorage.getItem("tasks");
-
-
-            if (storagedTasks && storagedTasks !== "[]") {
-                const parsedTasks = JSON.parse(storagedTasks);
-                await setTasks(parsedTasks);
-
-            } else {
-                await setTasks(mock as Task[]);
-
-            }
-
+        if (typeof window === "undefined") return [];
+        
+        const storagedTasks = window.localStorage.getItem("tasks");
+        
+        if (storagedTasks && storagedTasks !== "[]") {
+            return JSON.parse(storagedTasks) as Task[];
         }
 
-        retrieveTasks();
-
-    }, []);
+        return mock as Task[];
+    });
 
     useEffect(() => {
 
-        if (typeof window === undefined || typeof window === null) return;
+        if (typeof window === "undefined") return;
 
         const stringifyTasks = JSON.stringify(tasks);
         window.localStorage.setItem("tasks", stringifyTasks);
 
     }, [tasks]);
 
-    async function createTask(data: Task) {
-        
-        if(!data.title || !data.priority) return false;
+    async function createTask(data: TaskInput) {
 
-        if(data.title.length < 3) return false;
+        if (!data.title || !data.priority) return false;
 
-        if(!PRIORITY_META[data.priority]) return false;
+        if (data.title.length < 3) return false;
+
+        if (!PRIORITY_META[data.priority]) return false;
 
         const newTask = {
-            id: randomUUID(),
+            id: window.crypto.randomUUID(),
             title: data.title,
             description: data.description ?? "",
             priority: data.priority,
@@ -66,26 +64,39 @@ export function useTasks(): UseTasksResult {
             done: false,
         }
 
-        await setTasks([...tasks, newTask])
-        
+        setTasks((prev) => [...prev, newTask]);
+
         return true;
     }
 
-    async function updateTask(id: string) {
-        
-        if(!id) return false;
+    async function updateTask(data: TaskInput) {
+
+        if (!data.id) return false;
+
+        return true;
+    }
+
+    async function updateManyTask(ids: string[]) {
+        const idsSet = new Set(ids ?? []);
+
+        setTasks((prev) =>
+            prev.map((task) => ({
+                ...task,
+                done: idsSet.has(task.id),
+            }))
+        );
 
         return true;
     }
 
     async function deleteTask(id: string) {
-        
-        if(!id) return false;
 
-        await setTasks(tasks.filter((t) => t.id !== id));
+        if (!id) return false;
+
+        setTasks((prev) => prev.filter((t) => t.id !== id));
 
         return true;
     }
 
-    return { tasks, createTask, updateTask, deleteTask };
+    return { tasks, setTasks, createTask, updateTask, updateManyTask, deleteTask };
 }

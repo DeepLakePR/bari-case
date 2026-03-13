@@ -6,14 +6,16 @@ import TaskFilters from "@/components/task/TaskFilters";
 import TaskTable from "@/components/task/TaskTable";
 import TaskModalForm from "./task/TaskModalForm";
 import useModalForm from "@/hooks/useModalForm";
+import { useTasks } from "@/hooks/useTasks";
 
 export default function AppLayout() {
 
     const { open, setOpen } = useModalForm();
+    const { tasks, createTask, deleteTask, updateManyTask } = useTasks();
     
     return (
         <main className="mx-auto flex max-w-[100rem] flex-col p-8 bg-white rounded-lg">
-            <TaskModalForm open={open} />
+            <TaskModalForm open={open} onOpenChange={setOpen} onCreate={createTask} />
 
             <div className="rounded-t-xl py-4 pt-0">
                 <Typography.Title level={3}>Controle de Tarefas</Typography.Title>
@@ -31,7 +33,7 @@ export default function AppLayout() {
             </div>
 
             <div className="rounded-b-xl py-4 pt-0">
-                <TaskTable />
+                <TaskTable tasks={tasks} onDeleteTask={deleteTask} onUpdateMany={updateManyTask} />
             </div>
         </main>
     );

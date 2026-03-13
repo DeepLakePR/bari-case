@@ -1,84 +1,100 @@
 "use client";
 
-import { useState } from "react";
-import { Button, DatePicker, Form, Input, Modal, Select } from "antd";
+import { DatePicker, Flex, Form, Input, Modal, Select } from "antd";
+
+import type { Dayjs } from "dayjs";
+import type { TaskInput } from "@/hooks/useTasks";
 
 type FieldType = {
     title: string;
     description?: string;
     priority: "low" | "medium" | "high";
-    dueDate?: Date;
+    dueDate?: Dayjs | null;
 };
 
 export type TaskModalFormProps = {
     open: boolean;
-}
+    onOpenChange: (open: boolean) => void;
+    onCreate: (data: TaskInput) => Promise<boolean>;
+    isEditing?: boolean;
+};
 
-export default function TaskModalForm({ open }: TaskModalFormProps) {
-    const [isModalOpen, setIsModalOpen] = useState(open);
+export default function TaskModalForm({
+    open,
+    onOpenChange,
+    onCreate,
+    isEditing,
+}: TaskModalFormProps) {
+    const [form] = Form.useForm<FieldType>();
 
-    const handleOk = () => {
-        setIsModalOpen(false);
+    const handleSubmit = () => {
+        form.submit();
     };
 
     const handleCancel = () => {
-        setIsModalOpen(false);
+        onOpenChange(false);
     };
 
     return (
         <Modal
-            title="Basic Modal"
+            title={(!isEditing ? "Criar" : "Editar") + " Tarefa"}
             closable={{ "aria-label": "Cancelar" }}
-            open={isModalOpen}
-            onOk={handleOk}
+            open={open}
+            onOk={handleSubmit}
             onCancel={handleCancel}
+            okText={!isEditing ? "Criar" : "Salvar"}
+            cancelText="Cancelar"
         >
             <Form<FieldType>
+                form={form}
                 name="task"
-                labelCol={{ span: 8 }}
-                wrapperCol={{ span: 16 }}
-                initialValues={{ remember: true }}
+                initialValues={{ priority: "low" }}
                 layout="vertical"
-                onFinish={() => console.log("")}
-                onFinishFailed={() => console.log("")}
+                onFinish={(data) => {
+                    onCreate({
+                        ...data,
+                        dueDate: data.dueDate ? data.dueDate.format("YYYY-MM-DD") : "",
+                    });
+                    onOpenChange(false);
+                }}
                 autoComplete="on"
-                variant="underlined"
             >
                 <Form.Item<FieldType>
-                    label="TÃ­tulo"
+                    label="Título"
                     name="title"
-                    rules={[{ required: true, message: "Insira um tÃ­tulo.", min: 3 }]}
+                    rules={[{ required: true, message: "Insira um título.", min: 3 }]}
                 >
                     <Input />
                 </Form.Item>
 
-                <Form.Item<FieldType> label="DescriÃ§Ã£o" name="description">
+                <Form.Item<FieldType> label="Descrição" name="description">
                     <Input />
                 </Form.Item>
 
-                <Form.Item<FieldType>
-                    label="Prioridade"
-                    name="priority"
-                    rules={[{ required: true, message: "Defina uma prioridade." }]}
-                >
-                    <Select
-                        options={[
-                            { label: "Baixa", value: "low" },
-                            { label: "MÃ©dia", value: "medium" },
-                            { label: "Alta", value: "high" },
-                        ]}
-                    />
-                </Form.Item>
+                <Flex justify="space-between">
+                    <Form.Item<FieldType>
+                        label="Prioridade"
+                        name="priority"
+                        rules={[{ required: true, message: "Defina uma prioridade." }]}
+                        className="w-50"
+                    >
+                        <Select
+                            options={[
+                                { label: "Baixa", value: "low" },
+                                { label: "Média", value: "medium" },
+                                { label: "Alta", value: "high" },
+                            ]}
+                        />
+                    </Form.Item>
 
-                <Form.Item<FieldType> label="Data de Entrega" name="dueDate">
-                    <DatePicker />
-                </Form.Item>
+                    <Form.Item<FieldType> 
+                        label="Data de entrega" 
+                        name="dueDate"
+                        className="w-50">
+                        <DatePicker className="w-full" placeholder="Selecione uma data" />
+                    </Form.Item>
+                </Flex>
 
-                <Form.Item label={null}>
-                    <Button type="primary" htmlType="submit">
-                        Criar
-                    </Button>
-                </Form.Item>
             </Form>
         </Modal>
     );

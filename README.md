@@ -11,6 +11,7 @@
 - Não estruturei o layout/design em mobile-first e sim desktop-first, porém a aplicação está responsiva e funciona no mobile.
 - o Hook `useTasks.ts` centraliza toda a lógica de gerenciamento das tarefas (create, read, update, delete).
 - o Hook `useModalForm.ts` é usado para controlar o estado "open" da modal em diferentes componentes.
+- Foi utlizado IA na refatoração, revisão de código e criação de funcionalidades reutilizáveis.
 
 ## Estrutura localStorage
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CheckOutlined, ClockCircleOutlined, DeleteFilled, EditFilled, QuestionCircleOutlined } from "@ant-design/icons";
 import { Button, Empty, message, Popconfirm, Space, Table, Tag } from "antd";
 import type { TableColumnsType, TableProps } from "antd";
@@ -24,12 +24,10 @@ export default function TaskTable({
     onEditTask,
     loading = false,
 }: TaskTableProps) {
-    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>(
+        tasks.filter((t) => t.done === true).map((t) => t.id)
+    );
     const [messageApi, context] = message.useMessage();
-
-    useEffect(() => {
-        setSelectedRowKeys(tasks.filter((t) => t.done === true).map((t) => t.id));
-    }, [tasks]);
 
     const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
         setSelectedRowKeys(newSelectedRowKeys);

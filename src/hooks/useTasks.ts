@@ -36,12 +36,16 @@ export function useTasks(): UseTasksResult {
         const storagedTasks = window.localStorage.getItem("tasks");
 
         if (storagedTasks && storagedTasks !== "[]") {
-            setTasks(JSON.parse(storagedTasks) as Task[]);
+            setTimeout(() => {
+                setTasks(JSON.parse(storagedTasks) as Task[]);
+                setIsLoading(false);
+            }, 0);
         } else {
-            setTasks(mock as Task[]);
+            setTimeout(() => {
+                setTasks(mock as Task[]);
+                setIsLoading(false);
+            }, 0);
         }
-
-        setIsLoading(false);
     }, []);
 
     useEffect(() => {
@@ -82,13 +86,13 @@ export function useTasks(): UseTasksResult {
             prev.map((task) =>
                 task.id === data.id
                     ? {
-                          ...task,
-                          title: data.title,
-                          description: data.description ?? "",
-                          priority: data.priority,
-                          dueDate: data.dueDate ?? task.dueDate ?? "",
-                          done: data.done ?? task.done,
-                      }
+                        ...task,
+                        title: data.title,
+                        description: data.description ?? "",
+                        priority: data.priority,
+                        dueDate: data.dueDate ?? task.dueDate ?? "",
+                        done: data.done ?? task.done,
+                    }
                     : task
             )
         );

@@ -1,9 +1,11 @@
 "use client";
 
 import type { Task, TaskPriority } from "@/types/task";
-import mock from '@/data/tasks.json';
+import mock from "@/data/tasks.json";
 import { useEffect, useState } from "react";
 import { PRIORITY_META } from "@/lib/task";
+
+const STORAGE_KEY = "tasks";
 
 export type TaskInput = {
     id?: string;
@@ -25,27 +27,22 @@ export type UseTasksResult = {
 };
 
 export function useTasks(): UseTasksResult {
-
     const [tasks, setTasks] = useState<Task[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
-
         if (typeof window === "undefined") return;
 
-        const storagedTasks = window.localStorage.getItem("tasks");
+        const storagedTasks = window.localStorage.getItem(STORAGE_KEY);
+        const parsedTasks =
+            storagedTasks && storagedTasks !== "[]"
+                ? (JSON.parse(storagedTasks) as Task[])
+                : (mock as Task[]);
 
-        if (storagedTasks && storagedTasks !== "[]") {
-            setTimeout(() => {
-                setTasks(JSON.parse(storagedTasks) as Task[]);
-                setIsLoading(false);
-            }, 0);
-        } else {
-            setTimeout(() => {
-                setTasks(mock as Task[]);
-                setIsLoading(false);
-            }, 0);
-        }
+        setTimeout(() => {
+            setTasks(parsedTasks);
+            setIsLoading(false);
+        }, 0);
     }, []);
 
     useEffect(() => {
@@ -53,11 +50,10 @@ export function useTasks(): UseTasksResult {
         if (isLoading) return;
 
         const stringifyTasks = JSON.stringify(tasks);
-        window.localStorage.setItem("tasks", stringifyTasks);
+        window.localStorage.setItem(STORAGE_KEY, stringifyTasks);
     }, [isLoading, tasks]);
 
     async function createTask(data: TaskInput) {
-
         if (!data.title || !data.priority) return false;
 
         if (data.title.length < 3) return false;
@@ -71,7 +67,7 @@ export function useTasks(): UseTasksResult {
             priority: data.priority,
             dueDate: data.dueDate ? new Date(data.dueDate).toDateString() : "",
             done: false,
-        }
+        };
 
         setTasks((prev) => [...prev, newTask]);
 
@@ -79,7 +75,6 @@ export function useTasks(): UseTasksResult {
     }
 
     async function updateTask(data: TaskInput) {
-
         if (!data.id) return false;
 
         setTasks((prev) =>
@@ -121,7 +116,6 @@ export function useTasks(): UseTasksResult {
     }
 
     async function deleteTask(id: string) {
-
         if (!id) return false;
 
         setTasks((prev) => prev.filter((t) => t.id !== id));

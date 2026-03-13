@@ -12,14 +12,13 @@ import { useMemo, useState } from "react";
 import LoadingScreen from "@/components/LoadingScreen";
 
 export default function AppLayout() {
-
     const { open, setOpen } = useModalForm();
     const { tasks, createTask, deleteTask, updateManyTask, updateTask, isLoading } = useTasks();
     const [editingTask, setEditingTask] = useState<Task | null>(null);
     const [searchText, setSearchText] = useState<string>("");
     const [statusFilter, setStatusFilter] = useState<TaskFilterStatus>("all");
     const [priorityFilter, setPriorityFilter] = useState<TaskPriority[]>([]);
-    
+
     const filteredTasks = useMemo(() => {
         const normalizedSearch = searchText.trim().toLowerCase();
 
@@ -39,16 +38,30 @@ export default function AppLayout() {
         });
     }, [priorityFilter, searchText, statusFilter, tasks]);
 
+    const handleModalOpenChange = (nextOpen: boolean) => {
+        if (!nextOpen) setEditingTask(null);
+        setOpen(nextOpen);
+    };
+
+    const handleCreateClick = () => {
+        setEditingTask(null);
+        setOpen(true);
+    };
+
+    const handleEditTask = (task: Task) => {
+        setEditingTask(task);
+        setOpen(true);
+    };
+
+    if (isLoading) {
         return <LoadingScreen label="Carregando tarefas" />;
+    }
 
     return (
         <main className="mx-auto flex max-w-[100rem] flex-col p-8 bg-white rounded-lg">
             <TaskModalForm
                 open={open}
-                onOpenChange={(nextOpen) => {
-                    if (!nextOpen) setEditingTask(null);
-                    setOpen(nextOpen);
-                }}
+                onOpenChange={handleModalOpenChange}
                 onCreate={createTask}
                 onUpdate={updateTask}
                 task={editingTask}
@@ -72,10 +85,7 @@ export default function AppLayout() {
                     <Button
                         type="primary"
                         icon={<PlusOutlined />}
-                        onClick={() => {
-                            setEditingTask(null);
-                            setOpen(true);
-                        }}
+                        onClick={handleCreateClick}
                         className="w-full md:w-auto"
                     >
                         Nova tarefa
@@ -89,10 +99,7 @@ export default function AppLayout() {
                     onDeleteTask={deleteTask}
                     onUpdateMany={updateManyTask}
                     loading={isLoading}
-                    onEditTask={(task) => {
-                        setEditingTask(task);
-                        setOpen(true);
-                    }}
+                    onEditTask={handleEditTask}
                 />
             </div>
         </main>

@@ -15,6 +15,21 @@ type TaskFiltersProps = {
 
 const { Search } = Input;
 
+const priorityOptions = [
+    {
+        label: <Tag color={PRIORITY_META.low.color}>{PRIORITY_META.low.label.toUpperCase()}</Tag>,
+        value: "low",
+    },
+    {
+        label: <Tag color={PRIORITY_META.medium.color}>{PRIORITY_META.medium.label.toUpperCase()}</Tag>,
+        value: "medium",
+    },
+    {
+        label: <Tag color={PRIORITY_META.high.color}>{PRIORITY_META.high.label.toUpperCase()}</Tag>,
+        value: "high",
+    },
+] as const;
+
 export default function TaskFilters({
     search,
     status,
@@ -24,7 +39,7 @@ export default function TaskFilters({
     onPrioritiesChange,
 }: TaskFiltersProps) {
     return (
-        <Space className="flex-col md:flex-row items-center w-full" classNames={{ item: 'w-full md:w-auto' }}>
+        <Space className="flex-col md:flex-row items-center w-full" classNames={{ item: "w-full md:w-auto" }}>
             <Search
                 placeholder="Buscar"
                 allowClear
@@ -47,21 +62,7 @@ export default function TaskFilters({
                 placeholder="Prioridade"
                 value={priorities}
                 onChange={onPrioritiesChange}
-
-                options={[
-                    {
-                        label: <Tag color={PRIORITY_META.low.color}>{PRIORITY_META.low.label.toUpperCase()}</Tag>,
-                        value: "low",
-                    },
-                    {
-                        label: <Tag color={PRIORITY_META.medium.color}>{PRIORITY_META.medium.label.toUpperCase()}</Tag>,
-                        value: "medium",
-                    },
-                    {
-                        label: <Tag color={PRIORITY_META.high.color}>{PRIORITY_META.high.label.toUpperCase()}</Tag>,
-                        value: "high",
-                    },
-                ]}
+                options={[...priorityOptions]}
             />
         </Space>
     );

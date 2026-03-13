@@ -1,7 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import { CheckOutlined, ClockCircleOutlined, DeleteFilled, EditFilled, QuestionCircleOutlined } from "@ant-design/icons";
+import {
+    CheckOutlined,
+    ClockCircleOutlined,
+    DeleteFilled,
+    EditFilled,
+    QuestionCircleOutlined,
+} from "@ant-design/icons";
 import { Button, Empty, message, Popconfirm, Space, Table, Tag } from "antd";
 import type { TableColumnsType, TableProps } from "antd";
 import { PRIORITY_META } from "@/lib/task";
@@ -31,6 +37,34 @@ export default function TaskTable({
     );
     const [messageApi, context] = message.useMessage();
 
+    const handleDeleteConfirm = async (taskId: string) => {
+        const success = await onDeleteTask(taskId);
+        if (success) messageApi.success("Tarefa deletada com sucesso.");
+        else messageApi.error("Erro ao deletar tarefa.");
+    };
+
+    const renderPriority = (priority: Task["priority"]) => (
+        <Tag color={PRIORITY_META[priority].color}>{PRIORITY_META[priority].label.toUpperCase()}</Tag>
+    );
+
+    const renderDueDate = (value: string) =>
+        value ? (
+            new Date(value).toLocaleDateString("pt-BR")
+        ) : (
+            <p className="text-black/40">Sem data de entrega</p>
+        );
+
+    const renderStatus = (done: boolean) =>
+        done ? (
+            <p className="text-green-500 text-center md:text-left">
+                <CheckOutlined /> Concluída
+            </p>
+        ) : (
+            <p className="text-amber-500 text-center md:text-left">
+                <ClockCircleOutlined /> Pendente
+            </p>
+        );
+
     const rowSelection: TableRowSelection<Task> = {
         selectedRowKeys,
         onSelect: (record, selected) => {
@@ -49,37 +83,21 @@ export default function TaskTable({
             title: "Prioridade",
             dataIndex: "priority",
             key: "priority",
-            render: (priority: string, _, index) => (
-                <Tag color={PRIORITY_META[priority as keyof typeof PRIORITY_META].color} key={index}>
-                    {PRIORITY_META[priority as keyof typeof PRIORITY_META].label.toUpperCase()}
-                </Tag>
-            ),
-            width: 100
+            render: (priority: Task["priority"]) => renderPriority(priority),
+            width: 100,
         },
         { title: "Título", dataIndex: "title", key: "title" },
         {
             title: "Data de entrega",
             dataIndex: "dueDate",
             key: "dueDate",
-            render: (value: string) =>
-                value
-                    ? new Date(value).toLocaleDateString("pt-BR")
-                    : <p className="text-black/40">Sem data de entrega</p>
+            render: (value: string) => renderDueDate(value),
         },
         {
             title: "Status",
             dataIndex: "done",
             key: "done",
-            render: (done: boolean) =>
-                done ? (
-                    <p className="text-green-500 text-center md:text-left">
-                        <CheckOutlined /> Concluída
-                    </p>
-                ) : (
-                    <p className="text-amber-500 text-center md:text-left">
-                        <ClockCircleOutlined /> Pendente
-                    </p>
-                ),
+            render: (done: boolean) => renderStatus(done),
         },
         {
             title: "Ações",
@@ -97,13 +115,9 @@ export default function TaskTable({
                     <Popconfirm
                         title="Deletar Tarefa"
                         description="Você tem certeza que deseja deletar essa tarefa?"
-                        icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                        icon={<QuestionCircleOutlined style={{ color: "red" }} />}
                         okText="Sim"
-                        onConfirm={async () => {
-                            const success = await onDeleteTask(record.id);
-                            if (success) messageApi.success("Tarefa deletada com sucesso.")
-                            else messageApi.error("Erro ao deletar tarefa.");
-                        }}
+                        onConfirm={() => handleDeleteConfirm(record.id)}
                         cancelText="Cancelar"
                     >
                         <Button
@@ -111,16 +125,15 @@ export default function TaskTable({
                             danger
                             onClick={(event) => event.stopPropagation()}
                         />
-
                     </Popconfirm>
                 </Space>
             ),
         },
     ];
 
-    return (<>
-        {context}
-
+    return (
+        <>
+            {context}
             <Table<Task>
                 rowKey="id"
                 dataSource={tasks}
@@ -148,7 +161,6 @@ export default function TaskTable({
                     ),
                 }}
             />
-    </>
+        </>
     );
-
 }

@@ -34,6 +34,9 @@ export default function TaskModalForm({
     const isEditing = Boolean(task);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const modalTitle = `${isEditing ? "Editar" : "Criar"} Tarefa`;
+    const confirmText = isEditing ? "Salvar" : "Criar";
+
     const initialValues = useMemo<Partial<FieldType>>(
         () => ({
             title: task?.title ?? "",
@@ -61,14 +64,36 @@ export default function TaskModalForm({
         onOpenChange(false);
     };
 
+    const handleFinish = async (data: FieldType) => {
+        setIsSubmitting(true);
+        const payload: TaskInput = {
+            id: task?.id,
+            title: data.title,
+            description: data.description,
+            priority: data.priority,
+            dueDate: data.dueDate ? data.dueDate.format("YYYY-MM-DD") : "",
+        };
+
+        try {
+            if (isEditing) {
+                await onUpdate(payload);
+            } else {
+                await onCreate(payload);
+            }
+            onOpenChange(false);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <Modal
-            title={(!isEditing ? "Criar" : "Editar") + " Tarefa"}
+            title={modalTitle}
             closable={{ "aria-label": "Cancelar" }}
             open={open}
             onOk={handleSubmit}
             onCancel={handleCancel}
-            okText={!isEditing ? "Criar" : "Salvar"}
+            okText={confirmText}
             cancelText="Cancelar"
             confirmLoading={isSubmitting}
             forceRender
@@ -78,27 +103,7 @@ export default function TaskModalForm({
                 name="task"
                 initialValues={initialValues}
                 layout="vertical"
-                onFinish={async (data) => {
-                    setIsSubmitting(true);
-                    const payload: TaskInput = {
-                        id: task?.id,
-                        title: data.title,
-                        description: data.description,
-                        priority: data.priority,
-                        dueDate: data.dueDate ? data.dueDate.format("YYYY-MM-DD") : "",
-                    };
-
-                    try {
-                        if (isEditing) {
-                            await onUpdate(payload);
-                        } else {
-                            await onCreate(payload);
-                        }
-                        onOpenChange(false);
-                    } finally {
-                        setIsSubmitting(false);
-                    }
-                }}
+                onFinish={handleFinish}
                 autoComplete="on"
             >
                 <Form.Item<FieldType>

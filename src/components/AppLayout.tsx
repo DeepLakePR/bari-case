@@ -7,8 +7,8 @@ import TaskTable from "@/components/task/TaskTable";
 import TaskModalForm from "./task/TaskModalForm";
 import useModalForm from "@/hooks/useModalForm";
 import { useTasks } from "@/hooks/useTasks";
-import type { Task } from "@/types/task";
-import { useState } from "react";
+import type { Task, TaskFilterStatus, TaskPriority } from "@/types/task";
+import { useMemo, useState } from "react";
 import LoadingScreen from "@/components/LoadingScreen";
 
 export default function AppLayout() {
@@ -16,7 +16,29 @@ export default function AppLayout() {
     const { open, setOpen } = useModalForm();
     const { tasks, createTask, deleteTask, updateManyTask, updateTask, isLoading } = useTasks();
     const [editingTask, setEditingTask] = useState<Task | null>(null);
+    const [searchText, setSearchText] = useState<string>("");
+    const [statusFilter, setStatusFilter] = useState<TaskFilterStatus>("all");
+    const [priorityFilter, setPriorityFilter] = useState<TaskPriority[]>([]);
     
+    const filteredTasks = useMemo(() => {
+        const normalizedSearch = searchText.trim().toLowerCase();
+
+        return tasks.filter((task) => {
+            if (normalizedSearch && !task.title.toLowerCase().includes(normalizedSearch)) {
+                return false;
+            }
+
+            if (statusFilter === "pending" && task.done) return false;
+            if (statusFilter === "concluded" && !task.done) return false;
+
+            if (priorityFilter.length > 0 && !priorityFilter.includes(task.priority)) {
+                return false;
+            }
+
+            return true;
+        });
+    }, [priorityFilter, searchText, statusFilter, tasks]);
+
     if (isLoading) {
         return <LoadingScreen label="Carregando tarefas" />;
     }
@@ -40,7 +62,14 @@ export default function AppLayout() {
                 <Divider size="medium" />
 
                 <Flex justify="space-between">
-                    <TaskFilters />
+                    <TaskFilters
+                        search={searchText}
+                        status={statusFilter}
+                        priorities={priorityFilter}
+                        onSearchChange={setSearchText}
+                        onStatusChange={setStatusFilter}
+                        onPrioritiesChange={setPriorityFilter}
+                    />
 
                     <Button
                         type="primary"
@@ -57,7 +86,7 @@ export default function AppLayout() {
 
             <div className="rounded-b-xl py-4 pt-0">
                 <TaskTable
-                    tasks={tasks}
+                    tasks={filteredTasks}
                     onDeleteTask={deleteTask}
                     onUpdateMany={updateManyTask}
                     loading={isLoading}

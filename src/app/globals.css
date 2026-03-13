@@ -25,3 +25,28 @@ body {
   background: var(--ant-color-fill-alter) !important;
 }
 
+.priority-select-dropdown .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  background: transparent;
+}
+
+.priority-select-dropdown .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background: transparent;
+}
+
+.priority-select-dropdown .ant-select-item-option {
+  padding: 0;
+}
+
+.priority-select-dropdown .ant-select-item-option-content {
+  width: 100%;
+}
+
+.priority-tag-option {
+  display: block;
+  width: 100%;
+  margin-inline-end: 0;
+  padding: 6px 10px;
+  text-align: center;
+  border-radius: 6px;
+}
+

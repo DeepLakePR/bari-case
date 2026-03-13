@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo } from "react";
 import { CheckOutlined, ClockCircleOutlined, DeleteFilled, EditFilled, QuestionCircleOutlined } from "@ant-design/icons";
 import { Button, Empty, message, Popconfirm, Space, Table, Tag } from "antd";
 import type { TableColumnsType, TableProps } from "antd";
@@ -12,7 +12,7 @@ type TableRowSelection<T extends object = object> = TableProps<T>["rowSelection"
 type TaskTableProps = {
     tasks: Task[];
     onDeleteTask: (id: string) => Promise<boolean>;
-    onUpdateMany: (id: string[]) => Promise<boolean>;
+    onUpdateMany: (ids: string[], scopeIds: string[]) => Promise<boolean>;
     onEditTask: (task: Task) => void;
     loading?: boolean;
 };
@@ -24,19 +24,24 @@ export default function TaskTable({
     onEditTask,
     loading = false,
 }: TaskTableProps) {
-    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>(
-        tasks.filter((t) => t.done === true).map((t) => t.id)
+    const scopeIds = useMemo(() => tasks.map((task) => task.id), [tasks]);
+    const selectedRowKeys = useMemo(
+        () => tasks.filter((t) => t.done === true).map((t) => t.id),
+        [tasks]
     );
     const [messageApi, context] = message.useMessage();
 
-    const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-        setSelectedRowKeys(newSelectedRowKeys);
-        onUpdateMany(newSelectedRowKeys as string[]);
-    };
-
     const rowSelection: TableRowSelection<Task> = {
         selectedRowKeys,
-        onChange: onSelectChange,
+        onSelect: (record, selected) => {
+            const nextKeys = selected
+                ? Array.from(new Set([...selectedRowKeys, record.id]))
+                : selectedRowKeys.filter((id) => id !== record.id);
+            onUpdateMany(nextKeys as string[], scopeIds);
+        },
+        onSelectAll: (selected) => {
+            onUpdateMany(selected ? scopeIds : [], scopeIds);
+        },
     };
 
     const columns: TableColumnsType<Task> = [

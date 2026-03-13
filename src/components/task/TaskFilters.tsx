@@ -1,30 +1,41 @@
 "use client";
 
-import { Input, Select, Space } from "antd";
-import type { GetProps } from "antd";
-import { FILTER_OPTIONS } from "@/lib/task";
-import type { TaskFilterStatus } from "@/types/task";
+import { Input, Select, Space, Tag } from "antd";
+import { FILTER_OPTIONS, PRIORITY_META } from "@/lib/task";
+import type { TaskFilterStatus, TaskPriority } from "@/types/task";
+
+type TaskFiltersProps = {
+    search: string;
+    status: TaskFilterStatus;
+    priorities: TaskPriority[];
+    onSearchChange: (value: string) => void;
+    onStatusChange: (value: TaskFilterStatus) => void;
+    onPrioritiesChange: (value: TaskPriority[]) => void;
+};
 
 const { Search } = Input;
 
-type SearchProps = GetProps<typeof Input.Search>;
-
-export default function TaskFilters() {
-    const onSearch: SearchProps["onSearch"] = (value, _e, info) =>
-        console.log(info?.source, value);
-
-    const handleChange = (value: TaskFilterStatus) => {
-        console.log(`selected ${value}`);
-    };
-
+export default function TaskFilters({
+    search,
+    status,
+    priorities,
+    onSearchChange,
+    onStatusChange,
+    onPrioritiesChange,
+}: TaskFiltersProps) {
     return (
         <Space>
-            <Search placeholder="Buscar" allowClear onSearch={onSearch} />
+            <Search
+                placeholder="Buscar"
+                allowClear
+                value={search}
+                onChange={(event) => onSearchChange(event.target.value)}
+            />
 
             <Select
-                defaultValue="all"
+                value={status}
                 className="w-40"
-                onChange={handleChange}
+                onChange={onStatusChange}
                 options={[...FILTER_OPTIONS]}
             />
 
@@ -33,11 +44,22 @@ export default function TaskFilters() {
                 allowClear
                 className="w-70"
                 placeholder="Prioridade"
-                onChange={handleChange}
+                value={priorities}
+                onChange={onPrioritiesChange}
+             
                 options={[
-                    { label: "Baixa", value: "low" },
-                    { label: "Média", value: "medium" },
-                    { label: "Alta", value: "high" },
+                    {
+                        label: <Tag color={PRIORITY_META.low.color}>{PRIORITY_META.low.label.toUpperCase()}</Tag>,
+                        value: "low",
+                    },
+                    {
+                        label: <Tag color={PRIORITY_META.medium.color}>{PRIORITY_META.medium.label.toUpperCase()}</Tag>,
+                        value: "medium",
+                    },
+                    {
+                        label: <Tag color={PRIORITY_META.high.color}>{PRIORITY_META.high.label.toUpperCase()}</Tag>,
+                        value: "high",
+                    },
                 ]}
             />
         </Space>

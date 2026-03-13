@@ -20,7 +20,7 @@ export type UseTasksResult = {
     isLoading: boolean;
     createTask: (data: TaskInput) => Promise<boolean>;
     updateTask: (data: TaskInput) => Promise<boolean>;
-    updateManyTask: (id: string[]) => Promise<boolean>;
+    updateManyTask: (ids: string[], scopeIds?: string[]) => Promise<boolean>;
     deleteTask: (id: string) => Promise<boolean>;
 };
 
@@ -100,14 +100,21 @@ export function useTasks(): UseTasksResult {
         return true;
     }
 
-    async function updateManyTask(ids: string[]) {
+    async function updateManyTask(ids: string[], scopeIds?: string[]) {
         const idsSet = new Set(ids ?? []);
+        const scopeSet = scopeIds ? new Set(scopeIds) : null;
 
         setTasks((prev) =>
-            prev.map((task) => ({
-                ...task,
-                done: idsSet.has(task.id),
-            }))
+            prev.map((task) => {
+                if (scopeSet && !scopeSet.has(task.id)) {
+                    return task;
+                }
+
+                return {
+                    ...task,
+                    done: idsSet.has(task.id),
+                };
+            })
         );
 
         return true;

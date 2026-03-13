@@ -14,3 +14,6 @@
 
 No primeiro carregamento, o localStorage vem vazio, então é usado o mock data do `tasks.json`, porém ao fazer qualquer ação, os dados são salvos no localStorage e o mock data não é mais carregado.
 As tasks tem uma chave *tasks* no storage onde a estrutura é um *Array* de *Tasks*, contendo o *id, title, description, dueDate, priority & done*.
+
+
+RESPONSIVOOOOOOOOOOOOOOOOOOOOOOOOO

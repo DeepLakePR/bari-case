@@ -39,9 +39,7 @@ export default function AppLayout() {
         });
     }, [priorityFilter, searchText, statusFilter, tasks]);
 
-    if (isLoading) {
         return <LoadingScreen label="Carregando tarefas" />;
-    }
 
     return (
         <main className="mx-auto flex max-w-[100rem] flex-col p-8 bg-white rounded-lg">

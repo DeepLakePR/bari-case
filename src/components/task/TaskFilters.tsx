@@ -46,7 +46,7 @@ export default function TaskFilters({
                 placeholder="Prioridade"
                 value={priorities}
                 onChange={onPrioritiesChange}
-             
+
                 options={[
                     {
                         label: <Tag color={PRIORITY_META.low.color}>{PRIORITY_META.low.label.toUpperCase()}</Tag>,

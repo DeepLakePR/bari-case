@@ -125,7 +125,7 @@ export default function TaskTable({
             onRow={(record) => ({
                 onClick: (event) => {
                     const target = event.target as HTMLElement;
-                    if (target.closest("button") || target.closest(".ant-checkbox")) {
+                    if (target.closest("button") || target.closest(".ant-checkbox-wrapper")) {
                         return;
                     }
                     onEditTask(record);

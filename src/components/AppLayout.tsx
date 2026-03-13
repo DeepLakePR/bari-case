@@ -1,31 +1,38 @@
 "use client";
 
-import { Button, Divider, Flex, Typography } from "antd";
-import TaskFilters from "./task/TaskFilters";
-import TaskTable from "./task/TaskTable";
 import { PlusOutlined } from "@ant-design/icons";
+import { Button, Divider, Flex, Typography } from "antd";
+import TaskFilters from "@/components/task/TaskFilters";
+import TaskTable from "@/components/task/TaskTable";
+import TaskModalForm from "./task/TaskModalForm";
+import useModalForm from "@/hooks/useModalForm";
 
 export default function AppLayout() {
 
-    return <main className="flex flex-col mx-auto p-8 max-w-[100rem]">
-        <div className="p-4 bg-white rounded-t-xl">
-            <Typography.Title level={3}>
-                Controle de Tarefas
-            </Typography.Title>
+    const { open, setOpen } = useModalForm();
+    
+    return (
+        <main className="mx-auto flex max-w-[100rem] flex-col p-8 bg-white rounded-lg">
+            <TaskModalForm open={open} />
 
-            <Divider size="medium" />
+            <div className="rounded-t-xl py-4 pt-0">
+                <Typography.Title level={3}>Controle de Tarefas</Typography.Title>
 
-            <Flex justify="space-between">
-                <TaskFilters />
+                <Divider size="medium" />
 
-                <Button type="primary" icon={<PlusOutlined />}>
-                    Criar Tarefa
-                </Button>
-            </Flex>
-        </div>
+                <Flex justify="space-between">
+                    <TaskFilters />
 
-        <div className="p-4 pt-0 bg-white rounded-b-xl">
-            <TaskTable />
-        </div>
-    </main>
+                    <Button type="primary" icon={<PlusOutlined />}
+                    onClick={() => setOpen(true)}>
+                        Nova tarefa
+                    </Button>
+                </Flex>
+            </div>
+
+            <div className="rounded-b-xl py-4 pt-0">
+                <TaskTable />
+            </div>
+        </main>
+    );
 }

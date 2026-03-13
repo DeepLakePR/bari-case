@@ -1,95 +1,94 @@
 "use client";
 
-import { useState } from 'react';
-import { CheckOutlined, ClockCircleOutlined } from "@ant-design/icons";
-import { Table, Tag, Space, Button, Empty } from "antd";
+import { useState } from "react";
+import { CheckOutlined, ClockCircleOutlined, DeleteFilled, EditFilled } from "@ant-design/icons";
+import { Button, Empty, Space, Table, Tag } from "antd";
+import type { TableColumnsType, TableProps } from "antd";
+import { PRIORITY_META } from "@/lib/task";
+import type { Task } from "@/types/task";
+import { useTasks } from "@/hooks/useTasks";
 
-const { Column } = Table;
-
-import type { TableProps } from 'antd';
-
-type TableRowSelection<T extends object = object> = TableProps<T>['rowSelection'];
-
-interface TableDataType {
-    key: React.Key;
-    id: string;
-    title: string;
-    priority: string;
-    dueDate: string;
-    status: boolean;
-    actions: React.ReactElement;
-}
-
-const priorityConverter = {
-    high: {
-        display: "Alta",
-        color: "#fff"
-    },
-    medium: {
-        display: "Média",
-        color: "#fff"
-    },
-    low: {
-        display: "Baixa",
-        color: "#fff"
-    }
-};
+type TableRowSelection<T extends object = object> = TableProps<T>["rowSelection"];
 
 export default function TaskTable() {
-
-    const data: TableDataType[] = [];
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const { tasks } = useTasks();
 
     const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-        console.log('selectedRowKeys changed: ', newSelectedRowKeys);
+        console.log("selectedRowKeys changed: ", newSelectedRowKeys);
         setSelectedRowKeys(newSelectedRowKeys);
     };
 
-
-    const rowSelection: TableRowSelection<TableDataType> = {
+    const rowSelection: TableRowSelection<Task> = {
         selectedRowKeys,
         onChange: onSelectChange,
     };
 
-    return <Table<TableDataType>
-        dataSource={data} rowSelection={rowSelection}
-        locale={{ emptyText: <div className="p-12">
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={"Nenhuma tarefa encontrada."} />
-        </div> }}
-    >
-
-        <Column title="Título" dataIndex="title" key="title" />
-        <Column
-            title="Prioridade"
-            dataIndex="priority"
-            key="priority"
-            render={(priority: "high" | "medium" | "low") => (
-                <Tag color={priorityConverter[priority].color} key={priority}>
-                    {priorityConverter[priority].display.toUpperCase()}
+    const columns: TableColumnsType<Task> = [
+        {
+            title: "Prioridade",
+            dataIndex: "priority",
+            key: "priority",
+            render: (priority: string, _, index) => (
+                <Tag color={PRIORITY_META[priority as keyof typeof PRIORITY_META].color} key={index}>
+                    {PRIORITY_META[priority as keyof typeof PRIORITY_META].label.toUpperCase()}
                 </Tag>
-            )}
-        />
-        <Column title="Data de Entrega" dataIndex="dueDate" key="dueDate" />
-        <Column
-            title="Status"
-            dataIndex="status"
-            key="status"
-            render={(status: boolean) => (
-                status
-                    ? <p><CheckOutlined /> Concluída</p>
-                    : <p><ClockCircleOutlined /> Pendente</p>
-            )}
-        // Or use badge
-        />
-        <Column
-            title="Ações"
-            key="actions"
-            render={(_: React.ReactElement, record: TableDataType) => (
-                <Space size="medium">
-                    <Button>Editar {record.id}</Button>
-                    <Button>Deletar {record.id}</Button>
+            ),
+            width: 100
+        },
+        { title: "Título", dataIndex: "title", key: "title" },
+        {
+            title: "Data de entrega", 
+            dataIndex: "dueDate", 
+            key: "dueDate", 
+            render: (value: string) => 
+                value 
+                ? new Date(value).toLocaleDateString("pt-BR") 
+                : <p className="text-black/40">Sem data de entrega</p>
+        },
+        {
+            title: "Status",
+            dataIndex: "done",
+            key: "done",
+            render: (done: boolean) =>
+                done ? (
+                    <p className="text-green-500">
+                        <CheckOutlined /> Concluída
+                    </p>
+                ) : (
+                    <p className="text-amber-500">
+                        <ClockCircleOutlined /> Pendente
+                    </p>
+                ),
+        },
+        {
+            title: "Ações",
+            key: "actions",
+            render: (_: unknown, record) => (
+                <Space size="small">
+                    <Button icon={<EditFilled />} type="primary" />
+                    <Button icon={<DeleteFilled />} danger />
                 </Space>
-            )}
+            ),
+        },
+    ];
+
+    return (
+        <Table<Task>
+            rowKey="id"
+            dataSource={tasks}
+            rowSelection={rowSelection}
+            columns={columns}
+            locale={{
+                emptyText: (
+                    <div className="p-12">
+                        <Empty
+                            image={Empty.PRESENTED_IMAGE_SIMPLE}
+                            description={"Nenhuma tarefa encontrada."}
+                        />
+                    </div>
+                ),
+            }}
         />
-    </Table>
+    );
 }

@@ -1,9 +1,12 @@
 "use client";
 
 import { DatePicker, Flex, Form, Input, Modal, Select } from "antd";
+import { useEffect, useMemo } from "react";
 
 import type { Dayjs } from "dayjs";
 import type { TaskInput } from "@/hooks/useTasks";
+import type { Task } from "@/types/task";
+import dayjs from "dayjs";
 
 type FieldType = {
     title: string;
@@ -16,16 +19,38 @@ export type TaskModalFormProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onCreate: (data: TaskInput) => Promise<boolean>;
-    isEditing?: boolean;
+    onUpdate: (data: TaskInput) => Promise<boolean>;
+    task: Task | null;
 };
 
 export default function TaskModalForm({
     open,
     onOpenChange,
     onCreate,
-    isEditing,
+    onUpdate,
+    task,
 }: TaskModalFormProps) {
     const [form] = Form.useForm<FieldType>();
+    const isEditing = Boolean(task);
+
+    const initialValues = useMemo<Partial<FieldType>>(
+        () => ({
+            title: task?.title ?? "",
+            description: task?.description ?? "",
+            priority: task?.priority ?? "low",
+            dueDate: task?.dueDate ? dayjs(task.dueDate) : null,
+        }),
+        [task]
+    );
+
+    useEffect(() => {
+        if (!open) {
+            form.resetFields();
+            return;
+        }
+
+        form.setFieldsValue(initialValues);
+    }, [form, initialValues, open]);
 
     const handleSubmit = () => {
         form.submit();
@@ -48,13 +73,22 @@ export default function TaskModalForm({
             <Form<FieldType>
                 form={form}
                 name="task"
-                initialValues={{ priority: "low" }}
+                initialValues={initialValues}
                 layout="vertical"
                 onFinish={(data) => {
-                    onCreate({
-                        ...data,
+                    const payload: TaskInput = {
+                        id: task?.id,
+                        title: data.title,
+                        description: data.description,
+                        priority: data.priority,
                         dueDate: data.dueDate ? data.dueDate.format("YYYY-MM-DD") : "",
-                    });
+                    };
+
+                    if (isEditing) {
+                        onUpdate(payload);
+                    } else {
+                        onCreate(payload);
+                    }
                     onOpenChange(false);
                 }}
                 autoComplete="on"

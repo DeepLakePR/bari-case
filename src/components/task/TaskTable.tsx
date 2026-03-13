@@ -13,9 +13,10 @@ type TaskTableProps = {
     tasks: Task[];
     onDeleteTask: (id: string) => Promise<boolean>;
     onUpdateMany: (id: string[]) => Promise<boolean>;
+    onEditTask: (task: Task) => void;
 };
 
-export default function TaskTable({ tasks, onDeleteTask, onUpdateMany }: TaskTableProps) {
+export default function TaskTable({ tasks, onDeleteTask, onUpdateMany, onEditTask }: TaskTableProps) {
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>(
         tasks.filter((t) => t.done === true).map((t) => t.id)
     );
@@ -73,7 +74,14 @@ export default function TaskTable({ tasks, onDeleteTask, onUpdateMany }: TaskTab
             key: "actions",
             render: (_: unknown, record) => (
                 <Space size="small">
-                    <Button icon={<EditFilled />} type="primary" />
+                    <Button
+                        icon={<EditFilled />}
+                        type="primary"
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            onEditTask(record);
+                        }}
+                    />
                     <Popconfirm
                         title="Deletar Tarefa"
                         description="Você tem certeza que deseja deletar essa tarefa?"
@@ -85,7 +93,11 @@ export default function TaskTable({ tasks, onDeleteTask, onUpdateMany }: TaskTab
                             else messageApi.error("Erro ao deletar tarefa.");
                         }}
                     >
-                        <Button icon={<DeleteFilled />} danger />
+                        <Button
+                            icon={<DeleteFilled />}
+                            danger
+                            onClick={(event) => event.stopPropagation()}
+                        />
 
                     </Popconfirm>
                 </Space>
@@ -100,6 +112,15 @@ export default function TaskTable({ tasks, onDeleteTask, onUpdateMany }: TaskTab
             dataSource={tasks}
             rowSelection={rowSelection}
             columns={columns}
+            onRow={(record) => ({
+                onClick: (event) => {
+                    const target = event.target as HTMLElement;
+                    if (target.closest("button") || target.closest(".ant-checkbox")) {
+                        return;
+                    }
+                    onEditTask(record);
+                },
+            })}
             locale={{
                 emptyText: (
                     <div className="p-12">

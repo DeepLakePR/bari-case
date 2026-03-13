@@ -73,6 +73,21 @@ export function useTasks(): UseTasksResult {
 
         if (!data.id) return false;
 
+        setTasks((prev) =>
+            prev.map((task) =>
+                task.id === data.id
+                    ? {
+                          ...task,
+                          title: data.title,
+                          description: data.description ?? "",
+                          priority: data.priority,
+                          dueDate: data.dueDate ?? task.dueDate ?? "",
+                          done: data.done ?? task.done,
+                      }
+                    : task
+            )
+        );
+
         return true;
     }
 

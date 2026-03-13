@@ -17,6 +17,10 @@ body {
   font-family: var(--font-roboto), Helvetica, sans-serif;
 }
 
-.ant-table-row-selected > td {
+.ant-table-tbody > tr.ant-table-row-selected > td {
   background: transparent !important;
+}
+
+.ant-table-tbody > tr.ant-table-row-selected:hover > td {
+  background: var(--ant-color-fill-alter) !important;
 }

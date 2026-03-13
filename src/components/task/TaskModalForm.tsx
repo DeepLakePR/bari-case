@@ -113,7 +113,7 @@ export default function TaskModalForm({
                     <Input />
                 </Form.Item>
 
-                <Flex justify="space-between">
+                <Flex justify="space-between" gap={8}>
                     <Form.Item<FieldType>
                         label="Prioridade"
                         name="priority"

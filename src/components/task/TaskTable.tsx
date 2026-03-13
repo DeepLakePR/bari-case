@@ -72,11 +72,11 @@ export default function TaskTable({
             key: "done",
             render: (done: boolean) =>
                 done ? (
-                    <p className="text-green-500">
+                    <p className="text-green-500 text-center md:text-left">
                         <CheckOutlined /> Concluída
                     </p>
                 ) : (
-                    <p className="text-amber-500">
+                    <p className="text-amber-500 text-center md:text-left">
                         <ClockCircleOutlined /> Pendente
                     </p>
                 ),
@@ -104,6 +104,7 @@ export default function TaskTable({
                             if (success) messageApi.success("Tarefa deletada com sucesso.")
                             else messageApi.error("Erro ao deletar tarefa.");
                         }}
+                        cancelText="Cancelar"
                     >
                         <Button
                             icon={<DeleteFilled />}
@@ -119,32 +120,34 @@ export default function TaskTable({
 
     return (<>
         {context}
-        <Table<Task>
-            rowKey="id"
-            dataSource={tasks}
-            rowSelection={rowSelection}
-            columns={columns}
-            loading={loading}
-            onRow={(record) => ({
-                onClick: (event) => {
-                    const target = event.target as HTMLElement;
-                    if (target.closest("button") || target.closest(".ant-checkbox-wrapper")) {
-                        return;
-                    }
-                    onEditTask(record);
-                },
-            })}
-            locale={{
-                emptyText: (
-                    <div className="p-12">
-                        <Empty
-                            image={Empty.PRESENTED_IMAGE_SIMPLE}
-                            description={"Nenhuma tarefa encontrada."}
-                        />
-                    </div>
-                ),
-            }}
-        />
+
+            <Table<Task>
+                rowKey="id"
+                dataSource={tasks}
+                rowSelection={rowSelection}
+                columns={columns}
+                loading={loading}
+                onRow={(record) => ({
+                    onClick: (event) => {
+                        const target = event.target as HTMLElement;
+                        if (target.closest("button") || target.closest(".ant-checkbox-wrapper")) {
+                            return;
+                        }
+                        onEditTask(record);
+                    },
+                })}
+                className="overflow-auto"
+                locale={{
+                    emptyText: (
+                        <div className="p-12">
+                            <Empty
+                                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                description={"Nenhuma tarefa encontrada."}
+                            />
+                        </div>
+                    ),
+                }}
+            />
     </>
     );
 

@@ -56,12 +56,12 @@ export default function AppLayout() {
                 task={editingTask}
             />
 
-            <div className="rounded-t-xl py-4 pt-0">
+            <div className="rounded-t-xl py-4 pt-0 text-center md:text-left">
                 <Typography.Title level={3}>Controle de Tarefas</Typography.Title>
 
                 <Divider size="medium" />
 
-                <Flex justify="space-between">
+                <Flex className="flex-col md:flex-row md:justify-between items-center gap-2">
                     <TaskFilters
                         search={searchText}
                         status={statusFilter}
@@ -78,6 +78,7 @@ export default function AppLayout() {
                             setEditingTask(null);
                             setOpen(true);
                         }}
+                        className="w-full md:w-auto"
                     >
                         Nova tarefa
                     </Button>
